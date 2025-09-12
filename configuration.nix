@@ -3,41 +3,48 @@
 {
   imports = [ ./hardware-configuration.nix ];
 
-  # Bootloader
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Network
+  networking.hostName = "nixos";
   networking.networkmanager.enable = true;
 
-  # SDDM (login manager)
+  time.timeZone = "Asia/Jakarta";
+
+  i18n.defaultLocale = "en_US.UTF-8";
+  console.keyMap = "us";
+
   services.xserver.enable = true;
   services.xserver.displayManager.sddm.enable = true;
+  services.xserver.desktopManager.plasma5.enable = false; # disable DE
+  services.xserver.windowManager.hyprland.enable = true;
 
-  # Wayland/Hyprland
-  programs.hyprland.enable = true;
-
-  # User
+  # User rizqi
   users.users.rizqi = {
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" ];
-    shell = pkgs.zsh; # 
+    shell = pkgs.zsh;
   };
 
-  # Packages
   environment.systemPackages = with pkgs; [
-    git wget curl vim micro
-    hyprland
-    waybar
-    alacritty
-    dunst
-    rofi-wayland
+    vim micro git wget curl
+    zsh hyprland
   ];
 
-  # Enable sudo
-  security.sudo.enable = true;
+  programs.zsh.enable = true;
+  programs.git.enable = true;
 
-  # Timezone & locale
-  time.timeZone = "Asia/Jakarta";
-  i18n.defaultLocale = "en_US.UTF-8";
+  # Sound
+  sound.enable = true;
+  hardware.pulseaudio.enable = false;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    pulse.enable = true;
+  };
+
+  # Allow unfree
+  nixpkgs.config.allowUnfree = true;
+
+  system.stateVersion = "25.05"; # jangan diubah
 }
