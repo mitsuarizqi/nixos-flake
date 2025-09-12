@@ -31,7 +31,7 @@
             programs.hyprland.enable = true;
 
             # User
-            users.users.yourname = {
+            users.users.rizqi = {
               isNormalUser = true;
               extraGroups = [ "wheel" "networkmanager" ];
               shell = pkgs.zsh; # atau bash
