@@ -16,10 +16,9 @@
 
   services.xserver.enable = true;
   services.xserver.displayManager.sddm.enable = true;
-  services.xserver.desktopManager.plasma5.enable = false; # disable DE
+  services.xserver.desktopManager.plasma5.enable = false;
   services.xserver.windowManager.hyprland.enable = true;
 
-  # User rizqi
   users.users.rizqi = {
     isNormalUser = true;
     extraGroups = [ "wheel" "networkmanager" ];
@@ -34,7 +33,6 @@
   programs.zsh.enable = true;
   programs.git.enable = true;
 
-  # Sound
   sound.enable = true;
   hardware.pulseaudio.enable = false;
   services.pipewire = {
@@ -43,8 +41,7 @@
     pulse.enable = true;
   };
 
-  # Allow unfree
   nixpkgs.config.allowUnfree = true;
 
-  system.stateVersion = "25.05"; # jangan diubah
+  system.stateVersion = "25.05";
 }
