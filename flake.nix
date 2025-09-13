@@ -1,5 +1,5 @@
 {
-  description = "NixOS basic with Yuki home";
+  description = "Yuki NixOS Config - Snowflake";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -7,56 +7,31 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Tambah dari yuki kalau ada (misal hyprland.url = "github:hyprwm/Hyprland"; dll.)
+    flake-parts.url = "github:hercules-ci/flake-parts";  # Kalau yuki pake ini
   };
 
-  outputs = { self, nixpkgs, home-manager, ... }: {
-    nixosConfigurations."nixos-btw" = nixpkgs.lib.nixosSystem {
-      modules = [
-        ./hardware-configuration.nix
-        home-manager.nixosModules.home-manager
-        {
-          nix.settings.experimental-features = [ "nix-command" "flakes" ];
-          users.users.rizqi = {
-            isNormalUser = true;
-            extraGroups = [ "wheel" "networkmanager" ];
-          };
-          home-manager = {
-            useGlobalPkgs = true;
-            useUserPackages = true;
-            users.rizqi = {
-              imports = [ ./yuki/home ];  # Kalau path Yuki ada; hapus kalau error
-              home.username = "rizqi";
-              home.homeDirectory = "/home/rizqi";
-              home.stateVersion = "25.05";
-            };
-          };
-          networking.hostName = "nixos-btw";
-          time.timeZone = "Asia/Jakarta";
-          networking.networkmanager.enable = true;
-          system.stateVersion = "25.05";
-
-          # Bootloader GRUB untuk UEFI + dual-boot Windows
-          boot.loader = {
-            efi = {
-              canTouchEfiVariables = true;
-              efiSysMountPoint = "/boot";  # Mount ESP di /boot
-            };
-            grub = {
-              enable = true;
-              device = "nodev";  # UEFI: Jangan ganti
-              efiSupport = true;
-              useOSProber = true;  # Auto-detect Windows
-              configurationLimit = 5;
-            };
-          };
-
-          # Mount ESP (ganti /dev/sda1 dengan ESP FAT32-mu dari lsblk)
-          fileSystems."/boot" = {
-            device = "/dev/sda2";
-            fsType = "vfat";
-          };
-        }
-      ];
+  outputs = { self, nixpkgs, home-manager, flake-parts, ... }@inputs:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [ ];
+      systems = [ "x86_64-linux" ];
+      perSystem = { config, self', inputs', pkgs, system, ... }: {
+        _module.args.pkgs = import inputs.nixpkgs { inherit system; };
+      };
+      flake = {
+        nixosConfigurations.yuki = nixpkgs.lib.nixosSystem {
+          specialArgs = { inherit inputs; };
+          modules = [
+            ./configuration.nix
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.raexera = import ./home.nix;  # User dari yuki
+            }
+            # Import modules yuki: ./modules/hyprland.nix ./modules/zsh.nix dll.
+          ];
+        };
+      };
     };
-  };
 }
