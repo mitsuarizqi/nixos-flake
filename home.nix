@@ -1,8 +1,8 @@
 { config, pkgs, ... }:
 
 {
-  home.username = "tony";
-  home.homeDirectory = "/home/tony";
+  home.username = "rizqi";
+  home.homeDirectory = "/home/rizqi";
   programs.git.enable = true;
   home.stateVersion = "25.05";
   programs.bash = {
