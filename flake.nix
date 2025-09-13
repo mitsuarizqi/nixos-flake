@@ -8,13 +8,10 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    yuki = {
-      url = "path:./yuki";  # Import lokal dari /etc/nixos/yuki
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # Hapus yuki input—import manual aja
   };
 
-  outputs = inputs @ { self, nixpkgs, flake-parts, home-manager, yuki, ... }: 
+  outputs = inputs @ { self, nixpkgs, flake-parts, home-manager, ... }: 
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" ];
       perSystem = { config, self', inputs', system, ... }: {
@@ -24,7 +21,8 @@
         specialArgs = { inherit inputs; };
         modules = [
           ./hardware-configuration.nix
-          yuki.nixosModules.default  # Asumsi Yuki expose ini; kalau error, coba yuki.outputs.nixosModules.default atau /tmp/yuki/hosts/yuki
+          # Import Yuki hosts manual (folder NixOS + Home Manager)
+          ./yuki/hosts/yuki
           home-manager.nixosModules.home-manager
           {
             nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -35,7 +33,12 @@
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
-              users.rizqi = import ./yuki/hosts/yuki/home/rizqi;  # Sesuaikan path home kalau beda (misal default.nix)
+              users.rizqi = {  # Config home sederhana; Yuki override via import
+                home.username = "rizqi";
+                home.homeDirectory = "/home/rizqi";
+                home.stateVersion = "25.05";
+                # Tambah Yuki home modules manual kalau perlu (misal programs.hyprland.enable = true;)
+              };
             };
             networking.hostName = "nixos-btw";
             time.timeZone = "Asia/Jakarta";
