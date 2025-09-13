@@ -9,10 +9,10 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "nixos";
+  networking.hostName = "nixos-btw";
   networking.networkmanager.enable = true;
 
-  time.timeZone = "America/Los_Angeles";
+  time.timeZone = "Asia/Jakarta";
 
   services.displayManager.ly.enable = true;
   services.xserver = {
@@ -22,7 +22,7 @@
     windowManager.qtile.enable = true;
   };
 
-  users.users.tony = {
+  users.users.rizqi = {
     isNormalUser = true;
     extraGroups = [ "wheel" ];
     packages = with pkgs; [
@@ -35,7 +35,7 @@
   environment.systemPackages = with pkgs; [
     vim
     wget
-    alacritty
+    kitty
     git
   ];
 
