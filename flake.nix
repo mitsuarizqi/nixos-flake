@@ -16,22 +16,21 @@
 
   outputs = inputs @ { self, nixpkgs, flake-parts, yuki, home-manager, ... }: 
     flake-parts.lib.mkFlake { inherit inputs; } {
-      imports = [
-        yuki.flakeModule
-      ];
+      # Hapus yuki.flakeModule dari sini—ganti di modules NixOS
       systems = [ "x86_64-linux" ];
       perSystem = { config, self', inputs', system, ... }: {
-        # Opsional: devShells.default = pkgs.mkShell { ... };
+        # Kosong atau devShell jika perlu
       };
-      nixosConfigurations."your-hostname" = nixpkgs.lib.nixosSystem {
+      nixosConfigurations."nixos-btw" = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs; };
         modules = [
           ./hardware-configuration.nix
-          yuki.nixosModules.default
+          # Import Yuki modules manual (coba default; kalau error, ganti ke yuki.nixosModule.homeConfigurations atau cek repo)
+          inputs.yuki.nixosModules.default  # Atau yuki.nixosModules.home-manager jika beda
           home-manager.nixosModules.home-manager
           {
             nix.settings.experimental-features = [ "nix-command" "flakes" ];
-            users.users.youruser = {
+            users.users.rizqi = {
               isNormalUser = true;
               extraGroups = [ "wheel" "networkmanager" ];
             };
@@ -40,10 +39,10 @@
               useUserPackages = true;
               users.youruser = import ./home.nix;
             };
-            networking.hostName = "yuki-nixos";
+            networking.hostName = "nixos-btw";
             time.timeZone = "Asia/Jakarta";
             networking.networkmanager.enable = true;
-            system.stateVersion = "24.05";
+            system.stateVersion = "25.05";
           }
         ];
       };
