@@ -1,12 +1,12 @@
 { config, pkgs, ... }:
 {
-  home.username = "youruser";
-  home.homeDirectory = "/home/youruser";
+  home.username = "raexera";
+  home.homeDirectory = "/home/raexera";
   home.stateVersion = "24.05";
-  # Yuki akan override ini dengan config-nya (Hyprland, ZSH, dll.)
-  programs.git = {
-    enable = true;
-    userName = "Your Name";
-    userEmail = "your@email.com";
-  };
+
+  programs.zsh.enable = true;
+  programs.kitty.enable = true;  # Config Kitty dari yuki
+  programs.vscode.enable = true;  # Extensions dari yuki
+  wayland.windowManager.hyprland.enable = true;  # Hyprland config dari yuki
+  # Tambah modules lain: home.packages = [ pkgs.htop ]; dll.
 }
