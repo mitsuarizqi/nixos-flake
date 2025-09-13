@@ -7,29 +7,37 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Tambah dari yuki kalau ada (misal hyprland.url = "github:hyprwm/Hyprland"; dll.)
-    flake-parts.url = "github:hercules-ci/flake-parts";  # Kalau yuki pake ini
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    # Tambah inputs yuki lain kalau ada (hyprland, dll.)
   };
 
   outputs = { self, nixpkgs, home-manager, flake-parts, ... }@inputs:
+    let
+      system = "x86_64-linux";  # Ganti kalau ARM
+      pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;  # Ini override global buat semua!
+      };
+    in
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [ ];
-      systems = [ "x86_64-linux" ];
+      systems = [ system ];
       perSystem = { config, self', inputs', pkgs, system, ... }: {
-        _module.args.pkgs = import inputs.nixpkgs { inherit system; };
+        _module.args.pkgs = pkgs;  # Pass pkgs custom ke modules
       };
       flake = {
         nixosConfigurations.yuki = nixpkgs.lib.nixosSystem {
-          specialArgs = { inherit inputs; };
+          specialArgs = { inherit inputs pkgs; };  # Pass pkgs ke specialArgs
           modules = [
             ./configuration.nix
             home-manager.nixosModules.home-manager
             {
-              home-manager.useGlobalPkgs = true;
+              home-manager.useGlobalPkgs = true;  # Penting: HM pake pkgs dari system
               home-manager.useUserPackages = true;
-              home-manager.users.raexera = import ./home.nix;  # User dari yuki
+              home-manager.extraSpecialArgs = { inherit pkgs; };  # Pass ke HM users
+              home-manager.users.raexera = import ./home.nix;
             }
-            # Import modules yuki: ./modules/hyprland.nix ./modules/zsh.nix dll.
+            # ... modules yuki lain
           ];
         };
       };
