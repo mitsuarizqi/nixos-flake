@@ -1,64 +1,55 @@
-{ config, lib, pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
   imports = [
-    ./hardware-configuration.nix  # Dari nixos-generate-config
+    ./hardware-configuration.nix
   ];
 
-  # Bootloader: GRUB untuk dual-boot (lebih reliable daripada systemd-boot)
-  boot.loader = {
-    efi = {
-      canTouchEfiVariables = true;
-      efiSysMountPoint = "/boot";  # Share ESP Windows di /boot
-    };
-    grub = {
-      enable = true;
-      device = "nodev";  # UEFI
-      efiSupport = true;
-      useOSProber = true;  # Auto-detect Windows
-      configurationLimit = 5;  # Limit generations
-    };
+  # Bootloader: GRUB on SATA (/dev/sda)
+  boot.loader.systemd-boot.enable = false;
+  boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.grub = {
+    enable = true;
+    devices = [ "/dev/sda2" ]; # install GRUB ke SATA disk
+    useOSProber = true;       # deteksi OS lain
   };
 
-  # File systems: Share ESP Windows (ganti /dev/sda1 dengan ESP-mu)
-  fileSystems."/boot" = {
-    device = "/dev/sda1";  # ESP Windows (FAT32, >=512MB)
-    fsType = "vfat";
-  };
+  networking.hostName = "nixos-btw"; # bisa diganti sesuai mau
 
-  # Enable flakes permanen
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
-  # Networking & basic
-  networking.hostName = "yuki-nixos";
-  networking.networkmanager.enable = true;
-  time.timeZone = "Asia/Jakarta";  # Sesuaikan
+  time.timeZone = "Asia/Jakarta";
   i18n.defaultLocale = "en_US.UTF-8";
-  console.useXkbConfig = true;
 
-  # Users
-  users.users.youruser = {  # Ganti 'youruser'
+  console.keyMap = "us";
+  networking.networkmanager.enable = true;
+
+  users.users.rizqi = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" "video" ];
-    initialPassword = "password";  # Ganti nanti
+    extraGroups = [ "wheel" "networkmanager" ];
+    packages = with pkgs; [ vim git firefox ];
   };
 
-  # Packages dasar (Yuki tambah Hyprland, ZSH, Kitty via home-manager)
   environment.systemPackages = with pkgs; [
-    vim git wget curl
+    wget curl htop neovim micro
   ];
 
-  # Services: SDDM untuk Hyprland login (Yuki handle detail)
-  services.displayManager.sddm.enable = true;
-  services.desktopManager.plasma5.enable = true;  # Opsional, untuk Hyprland
-
-  # Home Manager integrasi (Yuki override ini)
-  home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
-    users.youruser = import ./home.nix;  # Dari panduan sebelumnya
+  # Opsional: GUI KDE
+  services.xserver = {
+    enable = true;
+    displayManager.sddm.enable = true;
+    desktopManager.plasma5.enable = true;
+    xkb.layout = "us";
   };
 
-  # State version
-  system.stateVersion = "24.05";  # Sesuaikan ISO-mu
+  sound.enable = true;
+  hardware.pulseaudio.enable = false;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    jack.enable = true;
+  };
+
+  services.openssh.enable = true;
+  networking.firewall.enable = true;
 }
