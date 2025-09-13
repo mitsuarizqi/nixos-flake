@@ -8,7 +8,7 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Hapus yuki dari inputs—import lokal aja
+    # Nggak perlu yuki input—pakai lokal
   };
 
   outputs = inputs @ { self, nixpkgs, flake-parts, home-manager, ... }: 
@@ -17,28 +17,28 @@
       perSystem = { config, self', inputs', system, ... }: {
         # Kosong
       };
-      nixosConfigurations."your-hostname" = nixpkgs.lib.nixosSystem {
+      nixosConfigurations."yuki-nixos" = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs; };
         modules = [
           ./hardware-configuration.nix
-          # Import Yuki lokal (sesuaikan path berdasarkan isi /tmp/yuki)
-          /tmp/yuki/nixos  # Ini folder utama NixOS modules di Yuki—kalau nggak ada, ganti ke /tmp/yuki/modules/nixos atau cek ls /tmp/yuki
-          home-manager.nixosModules.home-manager
+          # Import Yuki host config (ganti "yuki" ke hostname di repo jika beda, misal ls /tmp/yuki/hosts/)
+          /tmp/yuki/hosts/yuki
+          home-manager.nixosModules.home-manager  # Backup kalau Yuki nggak include
           {
             nix.settings.experimental-features = [ "nix-command" "flakes" ];
-            users.users.youruser = {
+            users.users.rizqi = {
               isNormalUser = true;
               extraGroups = [ "wheel" "networkmanager" ];
             };
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
-              users.youruser = import /tmp/yuki/home/youruser;  # Import home config Yuki untuk user-mu (ganti youruser, atau sesuaikan path)
+              users.rizqi = import /tmp/yuki/hosts/yuki/home/rizqi;  # Asumsi path home user; sesuaikan kalau beda
             };
             networking.hostName = "yuki-nixos";
             time.timeZone = "Asia/Jakarta";
             networking.networkmanager.enable = true;
-            system.stateVersion = "24.05";
+            system.stateVersion = "25.05";
           }
         ];
       };
