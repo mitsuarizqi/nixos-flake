@@ -1,14 +1,12 @@
 { config, pkgs, ... }:
-
 {
-  home.username = "rizqi";
-  home.homeDirectory = "/home/rizqi";
-  programs.git.enable = true;
-  home.stateVersion = "25.05";
-  programs.bash = {
+  home.username = "youruser";
+  home.homeDirectory = "/home/youruser";
+  home.stateVersion = "24.05";
+  # Yuki akan override ini dengan config-nya (Hyprland, ZSH, dll.)
+  programs.git = {
     enable = true;
-    shellAliases = {
-      btw = "echo i use nixos, btw";
-    };
+    userName = "Your Name";
+    userEmail = "your@email.com";
   };
 }
